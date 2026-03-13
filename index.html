@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="AL-FE İmalat">
+    <meta name="apple-mobile-web-app-title" content="AL-FE İmalat">
+    <meta name="theme-color" content="#121212">
+    <meta name="msapplication-navbutton-color" content="#d4af37">
+    
+    <title>AL-FE | Profesyonel Üretim v7</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        :root { --gold: #d4af37; --dark: #121212; --card: #1e1e1e; --text: #e0e0e0; --accent: #27ae60; --edit: #3498db; --danger: #e74c3c; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--dark); color: var(--text); -webkit-tap-highlight-color: transparent; }
+        
+        /* Navigasyon ve Header */
+        .header { background: #000; padding: 15px; display: flex; align-items: center; border-bottom: 2px solid var(--gold); position: sticky; top: 0; z-index: 100; }
+        .logo-box { border: 2px solid var(--gold); padding: 5px 12px; font-weight: 900; color: var(--gold); font-size: 20px; margin-right: 15px; }
+        .nav { display: flex; overflow-x: auto; gap: 8px; flex-grow: 1; scrollbar-width: none; }
+        .nav::-webkit-scrollbar { display: none; }
+        .nav-item { padding: 10px 15px; border-radius: 20px; background: #222; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap; color: #888; border: 1px solid #333; }
+        .nav-item.active { background: var(--gold); color: #000; }
+
+        /* Kart Yapısı ve Formlar */
+        .container { padding: 15px; padding-bottom: 100px; }
+        .card { background: var(--card); padding: 18px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        label { display: block; font-size: 9px; color: var(--gold); margin-bottom: 4px; font-weight: bold; text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #444; border-radius: 8px; color: white; margin-bottom: 10px; box-sizing: border-box; font-size: 14px; outline: none; }
+        input:focus { border-color: var(--gold); }
+        
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        
+        button { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: 900; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        .btn-gold { background: var(--gold); color: #000; margin-bottom: 10px; }
+        .btn-gold:active { transform: scale(0.98); opacity: 0.9; }
+
+        /* Tablo ve Sonuçlar */
+        .result-table { width: 100%; border-collapse: collapse; background: white; color: black; border-radius: 8px; overflow: hidden; }
+        .result-table th { background: #f2f2f2; padding: 10px 5px; font-size: 10px; border: 1px solid #ddd; }
+        .result-table td { padding: 10px 5px; border: 1px solid #ddd; font-size: 12px; text-align: center; }
+        .list-summary { background: #000; color: var(--gold); padding: 15px; border: 1px solid #333; border-top: none; display: flex; justify-content: space-between; font-weight: bold; border-radius: 0 0 12px 12px; }
+
+        /* Ayarlar Overlay */
+        #settingsOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; overflow-y: auto; }
+        .settings-content { width: 90%; max-width: 400px; background: var(--card); margin: 20px auto; padding: 20px; border: 2px solid var(--gold); border-radius: 15px; }
+        .section-title { font-size: 11px; color: var(--gold); margin: 15px 0 8px 0; border-bottom: 1px solid #444; padding-bottom: 3px; font-weight: bold; letter-spacing: 1px; }
+        
+        .quote-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #ccc; font-size: 13px; color: #333; }
+        .pl-select-box { display: flex; gap: 10px; margin-bottom: 15px; background: #2a2a2a; padding: 10px; border-radius: 8px; font-size: 11px; border: 1px solid #444; align-items: center; }
+        .pl-select-box input { width: auto; margin: 0; }
+        .btn-action { font-size: 20px; cursor: pointer; padding: 5px; }
+    </style>
+</head>
+<body onload="initApp()">
+
+    <div class="header">
+        <div class="logo-box">AL-FE</div>
+        <div class="nav">
+            <div class="nav-item active" onclick="showTab(this, 'projeler')">PROJELER</div>
+            <div class="nav-item" onclick="showTab(this, 'kesim')">KESİM</div>
+            <div class="nav-item" onclick="showTab(this, 'teklif')">TEKLİF</div>
+        </div>
+        <div onclick="toggleSettings()" style="color:var(--gold); font-size:26px; padding-left:10px; cursor:pointer">⚙️</div>
+    </div>
+
+    <div class="container">
+        <div id="projeler" class="tab-content active">
+            <div class="card">
+                <label>Yeni Proje Adı</label>
+                <input type="text" id="projectName" placeholder="Müşteri Adı / Proje">
+                <button class="btn-gold" onclick="saveProject()">💾 PROJEYİ SİSTEME KAYDET</button>
+            </div>
+            <div id="projectList"></div>
+        </div>
+
+        <div id="kesim" class="tab-content" style="display:none">
+            <div class="card">
+                <label>Malzeme ve Ölçü Girişi</label>
+                <select id="pType" onchange="toggleExtraPanels()">
+                    <option value="govde">G - GÖVDE</option>
+                    <option value="kapak">K - KAPAK</option>
+                    <option value="arkalik">A - ARKALIK</option>
+                    <option value="mermerit">M - MERMERİT</option>
+                </select>
+                <div id="standardInputs" class="grid-3">
+                    <div><label>En (mm)</label><input type="number" id="pEn" inputmode="numeric"></div>
+                    <div><label>Boy (mm)</label><input type="number" id="pBoy" inputmode="numeric"></div>
+                    <div><label>Adet</label><input type="number" id="pAdet" inputmode="numeric"></div>
+                </div>
+                <div id="mermeritInputs" style="display:none">
+                    <div class="grid-2">
+                        <div><label>Tezgah Boy (mm)</label><input type="number" id="mBoy" inputmode="numeric"></div>
+                        <div><label>Krom Evye</label><select id="mEvye"><option value="0">YOK</option><option value="1">VAR</option></select></div>
+                    </div>
+                </div>
+                <div id="pvcPanel" class="grid-2">
+                    <div><label>PVC EN (Adt)</label><select id="pvcEn"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select></div>
+                    <div><label>PVC BOY (Adt)</label><select id="pvcBoy"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select></div>
+                </div>
+                <button class="btn-gold" onclick="addItem()">➕ LİSTEYE EKLE</button>
+            </div>
+            
+            <div class="card" style="padding:0; overflow:hidden;">
+                <table id="mainTable" class="result-table">
+                    <thead><tr><th>TİP</th><th>ÖLÇÜ</th><th>AD</th><th>TUTAR</th><th>İŞLEM</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+                <div class="list-summary">
+                    <span>ARA TOPLAM:</span> <span id="listTotal">0 TL</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="teklif" class="tab-content" style="display:none">
+            <div class="card">
+                <label>Aksesuar Miktarları</label>
+                <div class="grid-3">
+                    <div><label>Menteşe</label><input type="number" id="tMen" value="0" onfocus="this.value=''" inputmode="numeric"></div>
+                    <div><label>Ray</label><input type="number" id="tRay" value="0" onfocus="this.value=''" inputmode="numeric"></div>
+                    <div><label>Piston</label><input type="number" id="tPis" value="0" onfocus="this.value=''" inputmode="numeric"></div>
+                </div>
+                <div class="grid-2">
+                    <div><label>Kulp</label><input type="number" id="tKulp" value="0" onfocus="this.value=''" inputmode="numeric"></div>
+                    <div><label>Ayak</label><input type="number" id="tAyak" value="0" onfocus="this.value=''" inputmode="numeric"></div>
+                </div>
+                <button class="btn-gold" onclick="calculateQuote()">🧾 MALİYET RAPORU AL</button>
+            </div>
+            <div id="quoteResult"></div>
+            <button id="pdfBtn" style="display:none; background:#27ae60; color:white; width:100%; padding:15px; margin-top:10px; border-radius:10px; font-weight:bold;" onclick="exportPDF()">📄 PDF OLARAK TELEFONA İNDİR</button>
+        </div>
+    </div>
+
+    <div id="settingsOverlay">
+        <div class="settings-content">
+            <h3 style="color:var(--gold); margin:0 0 15px 0; text-align:center;">SİSTEM PARAMETRELERİ</h3>
+            
+            <div class="section-title">PLAKA BİRİM FİYATLAR</div>
+            <div class="grid-3">
+                <div><label>Gövde</label><input type="number" id="fGovde" value="2150"></div>
+                <div><label>Kapak</label><input type="number" id="fKapak" value="3400"></div>
+                <div><label>Arkalık</label><input type="number" id="fArk" value="850"></div>
+            </div>
+
+            <div class="section-title">PLAKA BOYUT SEÇİMİ</div>
+            <div class="pl-select-box"><input type="radio" name="plG" id="plG1" value="2100x2800" checked><label for="plG1">GÖVDE: 210x280</label></div>
+            <div class="pl-select-box"><input type="radio" name="plG" id="plG2" value="1830x3660"><label for="plG2">GÖVDE: 183x366</label></div>
+            <div class="pl-select-box"><input type="radio" name="plK" id="plK1" value="2100x2800" checked><label for="plK1">KAPAK: 210x280</label></div>
+            <div class="pl-select-box"><input type="radio" name="plK" id="plK2" value="1830x3660"><label for="plK2">KAPAK: 183x366</label></div>
+
+            <div class="section-title">AKSESUAR & TEZGAH FİYAT</div>
+            <div class="grid-3">
+                <div><label>Menteşe</label><input type="number" id="fMen" value="45"></div>
+                <div><label>Ray</label><input type="number" id="fRay" value="180"></div>
+                <div><label>Piston</label><input type="number" id="fPis" value="75"></div>
+            </div>
+            <div class="grid-2">
+                <div><label>Mermerit/mt</label><input type="number" id="fMermerit" value="1800"></div>
+                <div><label>Evye/Ad</label><input type="number" id="fEvye" value="1400"></div>
+            </div>
+
+            <div class="section-title">KÂR & İŞÇİLİK</div>
+            <div class="grid-2">
+                <div><label>Kâr %</label><input type="number" id="kMalzeme" value="30"></div>
+                <div><label>İşçilik/m2</label><input type="number" id="fIscilik" value="450"></div>
+            </div>
+
+            <button class="btn-gold" onclick="saveSettings()">💾 AYARLARI HAFIZAYA AL</button>
+            <button onclick="toggleSettings()" style="background:#cc0000; color:white; margin-top:8px;">❌ VAZGEÇ</button>
+        </div>
+    </div>
+
+    <script>
+        // APK Dönüşümünde JavaScript'in Kesin Çalışması İçin Hata Yakalayıcı
+        window.onerror = function(msg, url, line) {
+            alert("Sistem Hatası: " + msg + "\nSatır: " + line);
+            return false;
+        };
+
+        let items = [];
+        let projects = JSON.parse(localStorage.getItem('alfe_v7_data')) || {};
+
+        function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
+        
+        function getPl(name) { 
+            const el = document.querySelector(`input[name="${name}"]:checked`);
+            const val = el ? el.value : "2100x2800";
+            const split = val.split('x');
+            return { en: parseInt(split[0]), boy: parseInt(split[1]) };
+        }
+
+        function toggleExtraPanels() {
+            const type = document.getElementById('pType').value;
+            document.getElementById('standardInputs').style.display = (type === 'mermerit') ? 'none' : 'grid';
+            document.getElementById('mermeritInputs').style.display = (type === 'mermerit') ? 'block' : 'none';
+            document.getElementById('pvcPanel').style.display = (type === 'arkalik' || type === 'mermerit') ? 'none' : 'grid';
+        }
+
+        function addItem() {
+            const tip = document.getElementById('pType').value;
+            const kar = 1 + (v('kMalzeme')/100);
+            let en, boy, adet, maliyet = 0, evyeVar = false;
+
+            if(tip === 'mermerit') {
+                en = 600; boy = v('mBoy'); adet = 1; 
+                evyeVar = document.getElementById('mEvye').value == "1";
+                maliyet = ((boy/1000) * v('fMermerit') * kar) + (evyeVar ? v('fEvye') * kar : 0);
+            } else {
+                en = v('pEn'); boy = v('pBoy'); adet = v('pAdet');
+                if(!en || !boy || !adet) { alert("Lütfen ölçü ve adet girin!"); return; }
+                let pl = (tip==='govde') ? getPl('plG') : (tip==='kapak' ? getPl('plK') : {en:2100, boy:2800});
+                let plFiyat = (tip==='govde') ? v('fGovde') : (tip==='kapak' ? v('fKapak') : v('fArk'));
+                maliyet = ((en * boy * adet) / (pl.en * pl.boy)) * plFiyat * kar;
+            }
+
+            let kod = tip.charAt(0).toUpperCase();
+            items.push({ kod, tip, en, boy, adet, maliyet, evye: evyeVar, pvcEn: v('pvcEn'), pvcBoy: v('pvcBoy') });
+            updateTable(); 
+            document.getElementById('pEn').value = ""; document.getElementById('pBoy').value = ""; document.getElementById('pAdet').value = "";
+        }
+
+        function updateTable() {
+            const tb = document.querySelector('#mainTable tbody'); tb.innerHTML = "";
+            let toplam = 0;
+            items.forEach((it, i) => {
+                toplam += it.maliyet;
+                tb.innerHTML += `<tr>
+                    <td style="font-weight:bold; color:#b8860b">${it.kod}</td>
+                    <td>${it.en}x${it.boy}</td><td>${it.adet}</td>
+                    <td>${it.maliyet.toFixed(0)}</td>
+                    <td>
+                        <span class="btn-action" style="color:var(--edit)" onclick="editItem(${i})">✏️</span>
+                        <span class="btn-action" style="color:var(--danger)" onclick="deleteItem(${i})">🗑️</span>
+                    </td>
+                </tr>`;
+            });
+            document.getElementById('listTotal').innerText = toplam.toLocaleString() + " TL";
+        }
+
+        function deleteItem(i) { items.splice(i,1); updateTable(); }
+
+        function editItem(i) {
+            const it = items[i];
+            document.getElementById('pType').value = it.tip;
+            toggleExtraPanels();
+            if(it.tip === 'mermerit') { document.getElementById('mBoy').value = it.boy; }
+            else { document.getElementById('pEn').value = it.en; document.getElementById('pBoy').value = it.boy; document.getElementById('pAdet').value = it.adet; }
+            deleteItem(i);
+        }
+
+        function calculateQuote() {
+            let areaTotal=0, malT=0, mermerMt=0, evyeAd=0;
+            items.forEach(it => {
+                areaTotal += (it.en * it.boy * it.adet);
+                if(it.tip === 'mermerit') { mermerMt += (it.boy/1000); if(it.evye) evyeAd++; }
+                malT += it.maliyet;
+            });
+
+            const kar = 1 + (v('kMalzeme')/100);
+            let aksT = (v('tMen')*v('fMen') + v('tRay')*v('fRay') + v('tPis')*v('fPis') + v('tKulp')*v('fKulp') + v('tAyak')*v('fAyak')) * kar;
+            let isc = (areaTotal/1000000) * v('fIscilik') * kar;
+            let ara = malT + aksT + isc;
+
+            let res = `<div id="print-area" style="background:white; color:black; padding:20px; border:4px solid #000;">
+                <h2 style="text-align:center; border-bottom:2px solid #000; margin:0 0 10px 0;">AL-FE MALİYET ANALİZİ</h2>
+                <div class="quote-row"><span>Levha Toplamı (Kâr Dahil)</span><span>${malT.toFixed(0)} TL</span></div>
+                <div class="quote-row"><span>Aksesuar Toplamı (Kâr Dahil)</span><span>${aksT.toFixed(0)} TL</span></div>
+                <div class="quote-row"><span>İşçilik & İmalat Bedeli</span><span>${isc.toFixed(0)} TL</span></div>
+                <div class="quote-row" style="font-weight:bold; font-size:16px; border-top:2px solid #000; margin-top:10px;">
+                    <span>TOPLAM MALİYET:</span><span>${ara.toFixed(0)} TL</span>
+                </div>
+                <div style="text-align:right; font-size:11px; margin-top:5px; color:#666;">* Fiyatlara KDV dahil değildir.</div>
+            </div>`;
+            document.getElementById('quoteResult').innerHTML = res;
+            document.getElementById('pdfBtn').style.display = 'block';
+        }
+
+        function saveSettings() {
+            const ids = ['fGovde','fKapak','fArk','fMermerit','fEvye','fMen','fRay','fPis','fAyak','kMalzeme','fIscilik'];
+            ids.forEach(id => localStorage.setItem(id, v(id)));
+            ['plG', 'plK'].forEach(name => {
+                const el = document.querySelector(`input[name="${name}"]:checked`);
+                if(el) localStorage.setItem(name, el.id);
+            });
+            alert("Ayarlar kaydedildi!");
+            toggleSettings();
+        }
+
+        function initApp() {
+            const ids = ['fGovde','fKapak','fArk','fMermerit','fEvye','fMen','fRay','fPis','fAyak','kMalzeme','fIscilik'];
+            ids.forEach(id => { if(localStorage.getItem(id)) document.getElementById(id).value = localStorage.getItem(id); });
+            renderProjects();
+        }
+
+        function saveProject() {
+            const n = document.getElementById('projectName').value; if(!n) return;
+            projects[n] = { items: [...items], date: new Date().toLocaleDateString() };
+            localStorage.setItem('alfe_v7_data', JSON.stringify(projects));
+            renderProjects();
+            alert("Proje Kaydedildi.");
+        }
+
+        function renderProjects() {
+            const d = document.getElementById('projectList'); d.innerHTML = "";
+            for(let n in projects) {
+                d.innerHTML += `<div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span><b>📂 ${n}</b><br><small>${projects[n].date}</small></span>
+                    <button onclick="loadProject('${n}')" style="width:auto; padding:8px 15px; background:var(--gold); color:black;">AÇ</button>
+                </div>`;
+            }
+        }
+
+        function loadProject(n) { items = projects[n].items; updateTable(); showTab(null, 'kesim'); }
+        function showTab(el, id) { document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none'); document.getElementById(id).style.display = 'block'; if(el) { document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active')); el.classList.add('active'); } }
+        function toggleSettings() { let s = document.getElementById('settingsOverlay'); s.style.display = (s.style.display === 'block') ? 'none' : 'block'; }
+        
+        async function exportPDF() { 
+            const opt = { margin: 1, filename: 'ALFE_Teklif.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
+            await html2pdf().set(opt).from(document.getElementById('print-area')).save(); 
+        }
+    </script>
+</body>
+</html>
